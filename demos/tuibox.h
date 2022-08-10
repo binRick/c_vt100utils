@@ -170,6 +170,24 @@
         (iter) >= 0 && (((var) = &(v)->data[(iter)]), 1);\
         --(iter))
 
+enum binding_mode_t {
+    BINDING_MODE_MOUSE_SCROLL_UP,
+    BINDING_MODE_MOUSE_SCROLL_DOWN,
+    BINDING_MODES_QTY,
+};
+struct binding_type_t {
+    void (*handler)(void*);
+};
+
+struct binding_type_t *binding_types[] = {
+    [BINDING_MODE_MOUSE_SCROLL_UP] = &(struct binding_type_t){
+        .handler = NULL,
+    },
+    [BINDING_MODE_MOUSE_SCROLL_DOWN] = &(struct binding_type_t){
+        .handler = NULL,
+    },
+    [BINDING_MODES_QTY] = NULL,
+};
 
 
 int vec_expand_(char **data, int *length, int *capacity, int memsz);
@@ -403,13 +421,12 @@ void ui_new(int s, ui_t *u){
   vec_init(&(u->b));
   vec_init(&(u->e));
   
-  printf("\x1b[?1049h\x1b[0m\x1b[2J\x1b[?1003h\x1b[?1015h\x1b[?1006h\x1b[?25l");
 
   u->mouse = 0;
 
   u->screen = s;
-  u->scroll = 0;
-  u->canscroll = 1;
+  u->scroll = 1;
+  u->canscroll = 0;
   
   u->id = 0;
 
@@ -594,6 +611,7 @@ void ui_redraw(ui_t *u){
  *   variables buf and n remain
  *   opaque to the user.
  */
+
 void _ui_update(char *c, int n, ui_t *u){
   ui_box_t *tmp;
   ui_evt_t *evt;
@@ -606,7 +624,15 @@ void _ui_update(char *c, int n, ui_t *u){
      c[2] == '<'){
     strncpy(cpy, c, n);
     tok = strtok(cpy+3, ";");
-    
+    if(strcmp(tok,"64")==0){
+        if(binding_types[BINDING_MODE_MOUSE_SCROLL_UP] != NULL && binding_types[BINDING_MODE_MOUSE_SCROLL_UP]->handler != NULL){
+            binding_types[BINDING_MODE_MOUSE_SCROLL_UP]->handler((void*)NULL);
+        }
+    }else if(strcmp(tok,"65")==0){
+        if(binding_types[BINDING_MODE_MOUSE_SCROLL_DOWN] != NULL && binding_types[BINDING_MODE_MOUSE_SCROLL_DOWN]->handler != NULL){
+            binding_types[BINDING_MODE_MOUSE_SCROLL_DOWN]->handler((void*)NULL);
+        }
+    }
     switch(tok[0]){
       case '0':
         u->mouse = (strchr(c, 'm') == NULL);

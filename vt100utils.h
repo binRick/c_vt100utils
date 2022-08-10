@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
+#define DEBUG_PARSE false
+#define DEBUG_DECODE false
 
 /**
  * PREPROCESSOR
@@ -196,7 +199,6 @@ vt100_encode(struct vt100_node_t *node)
 
   return out;
 }
-
 /*
  * vt100_parse: Parses a string beginning with
  *   "\x1b[" as a graphics/SGR escape sequence
@@ -204,6 +206,7 @@ vt100_encode(struct vt100_node_t *node)
 char *
 vt100_parse(struct vt100_node_t *node, char *str)
 {
+  if(DEBUG_PARSE)fprintf(stderr,">PARSING\n");
   char *start = str + 2;
   char *end = start;
   int args[256];
@@ -312,6 +315,7 @@ vt100_parse(struct vt100_node_t *node, char *str)
   }
 
 abort:;
+  fprintf(stderr,">ABORTING\n");
   node->fg = global_fg;
   node->bg = global_bg;
   node->mode = global_mode;
@@ -325,6 +329,7 @@ abort:;
 struct vt100_node_t *
 vt100_decode(char *str)
 {
+  if(DEBUG_DECODE)fprintf(stderr,">DECODING\n");
   struct vt100_node_t *head = malloc(sizeof(struct vt100_node_t)),
                       *cur  = head;
   char *start = str;
@@ -361,21 +366,22 @@ vt100_decode(char *str)
 }
 
 void
-vt100_free(struct vt100_node_t *head)
-{
+vt100_free(struct vt100_node_t *head){
   struct vt100_node_t *tmp = head->next,
                       *prev = head;
-
+  fprintf(stderr,">FREEING\n");
   while (tmp != NULL) {
     if (prev->str != empty_str && prev->str != NULL)
       free(prev->str);
-    free(prev);
+    if(prev)
+        free(prev);
     prev = tmp;
     tmp = tmp->next;
   }
-
-  free(prev->str);
-  free(prev);
+  if(prev->str)
+    free(prev->str);
+  if(prev)
+    free(prev);
 }
 
 #endif
