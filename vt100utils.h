@@ -1,8 +1,6 @@
 #pragma once
 #include <stdint.h>
 ///////////////////////////////////////////////////////
-#define DEBUG_PARSE     false
-#define DEBUG_DECODE    false
 #define MAX(a, b)    (a > b ? a : b)
 ///////////////////////////////////////////////////////
 struct vt100_color_t {

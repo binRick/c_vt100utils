@@ -1,4 +1,5 @@
 #pragma once
+//////////////////////////////////////////
 #include "vt100utils.h"
 //////////////////////////////////////////
 #include <stdbool.h>
@@ -6,11 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//////////////////////////////////////////
 static struct vt100_color_t default_fg = { palette_8, 7 };
 static struct vt100_color_t default_bg = { palette_8, 0 };
 static struct vt100_color_t global_fg = { palette_8, 7 }, global_bg = { palette_8, 0 };
 static uint8_t              global_mode;
-static char                 *empty_str = "";
+static char                 *empty_str = { NULL };
 
 
 char *vt100_sgr(struct vt100_node_t *node, struct vt100_node_t *prev) {
@@ -148,9 +150,6 @@ char *vt100_encode(struct vt100_node_t *node) {
 
 
 char *vt100_parse(struct vt100_node_t *node, char *str) {
-  if (DEBUG_PARSE) {
-    fprintf(stderr, ">PARSING\n");
-  }
   char                 *start = str + 2;
   char                 *end   = start;
   int                  args[256];
@@ -273,9 +272,6 @@ abort:;
 } // vt100_parse
 
 struct vt100_node_t *vt100_decode(char *str) {
-  if (DEBUG_DECODE) {
-    fprintf(stderr, ">DECODING\n");
-  }
   struct vt100_node_t *head  = malloc(sizeof(struct vt100_node_t)),
                       *cur   = head;
   char                *start = str;
@@ -317,7 +313,6 @@ void vt100_free(struct vt100_node_t *head) {
   struct vt100_node_t *tmp  = head->next,
                       *prev = head;
 
-  fprintf(stderr, ">FREEING\n");
   while (tmp != NULL) {
     if (prev->str != empty_str && prev->str != NULL) {
       free(prev->str);
