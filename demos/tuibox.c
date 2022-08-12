@@ -1,16 +1,30 @@
 #pragma once
-#include <stdlib.h>
-#include <string.h>
-#include "tuibox.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
+////////////////////////////////////////////////
+#include "tuibox.h"
+////////////////////////////////////////////////
+struct binding_type_t *binding_types[] = {
+  [BINDING_MODE_MOUSE_SCROLL_UP] = &(struct binding_type_t)  {
+    .handler = NULL,
+  },
+  [BINDING_MODE_MOUSE_SCROLL_DOWN] = &(struct binding_type_t){
+    .handler = NULL,
+  },
+  [BINDING_MODE_UNHANDLED_INPUT] = &(struct binding_type_t)  {
+    .handler = NULL,
+  },
+  [BINDING_MODES_QTY] = NULL,
+};
 
 
 char *_strdup_escaped(char *tmp) {
@@ -29,20 +43,6 @@ char *_strdup_escaped(char *tmp) {
   return(ret);
 }
 
-struct binding_type_t *binding_types[] = {
-  [BINDING_MODE_MOUSE_SCROLL_UP] = &(struct binding_type_t)  {
-    .handler = NULL,
-  },
-  [BINDING_MODE_MOUSE_SCROLL_DOWN] = &(struct binding_type_t){
-    .handler = NULL,
-  },
-  [BINDING_MODE_UNHANDLED_INPUT] = &(struct binding_type_t)  {
-    .handler = NULL,
-  },
-  [BINDING_MODES_QTY] = NULL,
-};
-
-
 
 int vec_expand_(char **data, int *length, int *capacity, int memsz) {
   if (*length + 1 > *capacity) {
@@ -52,7 +52,7 @@ int vec_expand_(char **data, int *length, int *capacity, int memsz) {
     if (ptr == NULL) {
       return(-1);
     }
-    *data     = (char*)ptr;
+    *data     = (char *)ptr;
     *capacity = n;
   }
   return(0);
@@ -159,6 +159,7 @@ void vec_swap_(char **data, int *length, int *capacity, int memsz,
   }
 }
 
+
 void ui_new(int s, ui_t *u){
   struct termios raw;
 
@@ -190,11 +191,6 @@ void ui_new(int s, ui_t *u){
 }
 
 
-/*
- * Frees the given UI struct,
- *   and takes the terminal
- *   out of raw mode.
- */
 void ui_free(ui_t *u){
   ui_box_t *val;
   ui_evt_t *evt;
@@ -226,17 +222,6 @@ void ui_free(ui_t *u){
 }
 
 
-/*
- * Adds a new box to the UI.
- *
- * This function is very simple in
- *   nature, but the variety of
- *   properties associated with
- *   an individual box makes it
- *   intimidating to look at.
- * TODO: Find some way to
- *   strip this down.
- */
 int ui_add(int x, int y, int w, int h, int screen,
            char *watch, char initial,
            func draw, func onclick, func onhover,
@@ -288,10 +273,6 @@ void ui_key(char *c, func f, ui_t *u){
 }
 
 
-/*
- * Clears all elements from
- *   the UI.
- */
 void ui_clear(ui_t *u){
   int tmp = u->screen;
 
@@ -370,20 +351,6 @@ void ui_redraw(ui_t *u){
   u->force = 1;
   ui_draw(u);
 }
-
-
-/*
- * Handles mouse and keyboard
- *   events, given a read()
- *   buffer.
- *
- * This is prefixed with an underscore
- *   to ensure consistency with the
- *   ui_loop macro, ensuring that the
- *   variables buf and n remain
- *   opaque to the user.
- */
-
 
 void _ui_update(char *c, int n, ui_t *u){
   ui_box_t *tmp;
@@ -482,13 +449,9 @@ void _ui_update(char *c, int n, ui_t *u){
 } // _ui_update
 
 
-/*
- * HELPERS
- */
 void _ui_text(ui_box_t *b, char *out){
   sprintf(out, "%s", (char *)b->data1);
 }
-
 
 int ui_text(int x, int y, char *str,
             int screen,

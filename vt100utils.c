@@ -1,14 +1,19 @@
 #pragma once
 #include "vt100utils.h"
-static struct vt100_color_t
-  default_fg = { palette_8, 7 },
-  default_bg = { palette_8, 0 };
+//////////////////////////////////////////
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+static struct vt100_color_t default_fg = { palette_8, 7 };
+static struct vt100_color_t default_bg = { palette_8, 0 };
 static struct vt100_color_t global_fg = { palette_8, 7 }, global_bg = { palette_8, 0 };
-static uint8_t global_mode;
-static char    *empty_str = "";
+static uint8_t              global_mode;
+static char                 *empty_str = "";
 
 
-char *vt100_sgr(struct vt100_node_t *node, struct vt100_node_t *prev)      {
+char *vt100_sgr(struct vt100_node_t *node, struct vt100_node_t *prev) {
   char *buf = malloc(128);
   int  len  = sprintf(buf, "\x1b[");
   int  i;
@@ -109,12 +114,7 @@ char *vt100_sgr(struct vt100_node_t *node, struct vt100_node_t *prev)      {
 } // vt100_sgr
 
 
-/*
- * vt100_encode: Encode a chain of nodes as
- *   a continuous string, for printing to
- *   the terminal
- */
-char *vt100_encode(struct vt100_node_t *node)      {
+char *vt100_encode(struct vt100_node_t *node) {
   int                 len = 0;
   int                 size;
   char                *out = malloc((size = MAX(node->len, 32)));
@@ -147,11 +147,7 @@ char *vt100_encode(struct vt100_node_t *node)      {
 }
 
 
-/*
- * vt100_parse: Parses a string beginning with
- *   "\x1b[" as a graphics/SGR escape sequence
- */
-char *vt100_parse(struct vt100_node_t *node, char *str)      {
+char *vt100_parse(struct vt100_node_t *node, char *str) {
   if (DEBUG_PARSE) {
     fprintf(stderr, ">PARSING\n");
   }
@@ -276,11 +272,7 @@ abort:;
   return(str + 1);
 } // vt100_parse
 
-/*
- * vt100_decode: Decodes an input string
- *   into a chain of nodes
- */
-struct vt100_node_t *vt100_decode(char *str)                     {
+struct vt100_node_t *vt100_decode(char *str) {
   if (DEBUG_DECODE) {
     fprintf(stderr, ">DECODING\n");
   }
@@ -321,7 +313,7 @@ struct vt100_node_t *vt100_decode(char *str)                     {
 }
 
 
-void vt100_free(struct vt100_node_t *head)      {
+void vt100_free(struct vt100_node_t *head) {
   struct vt100_node_t *tmp  = head->next,
                       *prev = head;
 
