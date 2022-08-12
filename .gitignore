@@ -1,3 +1,7 @@
 test
-demos/overflow
-demos/hover
+examples/overflow
+examples/hover
+.attic
+*unc-bac*
+examples/words
+examples/truecolor_stresstest
