@@ -1,8 +1,8 @@
 #pragma once
 #define VEC_VERSION     "0.2.1"
 #define MAXCACHESIZE    65535
-#include <termios.h>
 #include "tuibox-vec.h"
+#include <termios.h>
 ////////////////////////////////////////////////////
 enum binding_mode_t {
   BINDING_MODE_MOUSE_SCROLL_UP,
@@ -54,4 +54,5 @@ void ui_redraw(ui_t *u);
 void _ui_update(char *c, int n, ui_t *u);
 void _ui_text(ui_box_t *b, char *out);
 int ui_text(int x, int y, char *str, int screen, func click, func hover, ui_t *u);
+
 //////////////////////////////////////////////////////////////////////////////////////////////

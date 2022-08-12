@@ -13,6 +13,8 @@
 ////////////////////////////////////////////////
 #include "tuibox.h"
 ////////////////////////////////////////////////
+#include "tuibox-vec.h"
+////////////////////////////////////////////////
 struct binding_type_t *binding_types[] = {
   [BINDING_MODE_MOUSE_SCROLL_UP] = &(struct binding_type_t)  {
     .handler = NULL,
@@ -41,122 +43,6 @@ char *_strdup_escaped(char *tmp) {
   }
   *dst = 0;
   return(ret);
-}
-
-
-int vec_expand_(char **data, int *length, int *capacity, int memsz) {
-  if (*length + 1 > *capacity) {
-    void *ptr;
-    int  n = (*capacity == 0) ? 1 : *capacity << 1;
-    ptr = realloc(*data, n * memsz);
-    if (ptr == NULL) {
-      return(-1);
-    }
-    *data     = (char *)ptr;
-    *capacity = n;
-  }
-  return(0);
-}
-
-
-int vec_reserve_(char **data, int *length, int *capacity, int memsz, int n) {
-  (void)length;
-  if (n > *capacity) {
-    void *ptr = realloc(*data, n * memsz);
-    if (ptr == NULL) {
-      return(-1);
-    }
-    *data     = ptr;
-    *capacity = n;
-  }
-  return(0);
-}
-
-
-int vec_reserve_po2_(char **data, int *length, int *capacity, int memsz, int n) {
-  int n2 = 1;
-
-  if (n == 0) {
-    return(0);
-  }
-  while (n2 < n) {
-    n2 <<= 1;
-  }
-  return(vec_reserve_(data, length, capacity, memsz, n2));
-}
-
-
-int vec_compact_(char **data, int *length, int *capacity, int memsz) {
-  if (*length == 0) {
-    free(*data);
-    *data     = NULL;
-    *capacity = 0;
-    return(0);
-  } else {
-    void *ptr;
-    int  n = *length;
-    ptr = realloc(*data, n * memsz);
-    if (ptr == NULL) {
-      return(-1);
-    }
-    *capacity = n;
-    *data     = ptr;
-  }
-  return(0);
-}
-
-
-int vec_insert_(char **data, int *length, int *capacity, int memsz,
-                int idx) {
-  int err = vec_expand_(data, length, capacity, memsz);
-
-  if (err) {
-    return(err);
-  }
-  memmove(*data + (idx + 1) * memsz,
-          *data + idx * memsz,
-          (*length - idx) * memsz);
-  return(0);
-}
-
-
-void vec_splice_(char **data, int *length, int *capacity, int memsz,
-                 int start, int count) {
-  (void)capacity;
-  memmove(*data + start * memsz,
-          *data + (start + count) * memsz,
-          (*length - start - count) * memsz);
-}
-
-
-void vec_swapsplice_(char **data, int *length, int *capacity, int memsz,
-                     int start, int count) {
-  (void)capacity;
-  memmove(*data + start * memsz,
-          *data + (*length - count) * memsz,
-          count * memsz);
-}
-
-
-void vec_swap_(char **data, int *length, int *capacity, int memsz,
-               int idx1, int idx2) {
-  unsigned char *a, *b, tmp;
-  int           count;
-
-  (void)length;
-  (void)capacity;
-  if (idx1 == idx2) {
-    return;
-  }
-  a     = (unsigned char *)*data + idx1 * memsz;
-  b     = (unsigned char *)*data + idx2 * memsz;
-  count = memsz;
-  while (count--) {
-    tmp = *a;
-    *a  = *b;
-    *b  = tmp;
-    a++, b++;
-  }
 }
 
 
@@ -343,14 +229,11 @@ void ui_draw(ui_t *u){
 }
 
 
-/*
- * Forces a redraw of the screen,
- *   updating all boxes' caches.
- */
 void ui_redraw(ui_t *u){
   u->force = 1;
   ui_draw(u);
 }
+
 
 void _ui_update(char *c, int n, ui_t *u){
   ui_box_t *tmp;
@@ -452,6 +335,7 @@ void _ui_update(char *c, int n, ui_t *u){
 void _ui_text(ui_box_t *b, char *out){
   sprintf(out, "%s", (char *)b->data1);
 }
+
 
 int ui_text(int x, int y, char *str,
             int screen,

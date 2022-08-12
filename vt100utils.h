@@ -27,4 +27,5 @@ struct vt100_node_t *vt100_decode(char *str);
 char *vt100_sgr(struct vt100_node_t *node, struct vt100_node_t *prev);
 char *vt100_encode(struct vt100_node_t *node);
 void vt100_free(struct vt100_node_t *head);
+
 ///////////////////////////////////////////////////////
